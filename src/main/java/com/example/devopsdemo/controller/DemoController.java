@@ -15,6 +15,6 @@ public class DemoController {
      */
     @GetMapping("/hello")
     public String hello() {
-        return "DevOps demo application is running!";
+        return "DevOps demo - CI/CD is working!";
     }
 }
