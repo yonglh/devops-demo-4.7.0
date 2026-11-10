@@ -131,7 +131,7 @@ workflows:
           context: docker-hub
           requires:
             - publish
-            - notify:
+      - notify:
           name: notify-success
           result: success
           requires:
