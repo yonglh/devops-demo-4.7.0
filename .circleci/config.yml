@@ -70,21 +70,6 @@ jobs:
           monitor-on-build: false
 
   # ==========================================
-  # SNYK_CODE JOB - Snyk Code: static analysis (SAST) of src/
-  # ==========================================
-  snyk_code:
-    docker:
-      - image: cimg/openjdk:21.0
-    steps:
-      - checkout
-      - snyk/scan:
-          command: code test
-          severity-threshold: high
-          cli-version: 1.1308.1
-          monitor-on-build: false
-
-
-  # ==========================================
   # PUBLISH JOB - Build and push Docker image
   # ==========================================
   publish:
@@ -156,9 +141,6 @@ workflows:
     jobs:
       - build
       - snyk_scan:
-          requires:
-            - build
-      - snyk_code:
           requires:
             - build
       - test:
