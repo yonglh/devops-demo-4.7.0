@@ -1,5 +1,8 @@
 version: 2.1
 
+orbs:
+  snyk: snyk/snyk@2.3.0
+
 jobs:
   # ==========================================
   # BUILD JOB - Compile and package
@@ -48,6 +51,38 @@ jobs:
           path: target/surefire-reports
       - store_artifacts:
           path: target/surefire-reports
+
+    # ==========================================
+  # SNYK_SCAN JOB - Snyk: scan Maven dependencies
+  # ==========================================
+  snyk_scan:
+    docker:
+      - image: cimg/openjdk:21.0
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - maven-deps-{{ checksum "pom.xml" }}
+            - maven-deps-
+      - snyk/scan:
+          severity-threshold: high
+          cli-version: 1.1308.1
+          monitor-on-build: false
+
+  # ==========================================
+  # SNYK_CODE JOB - Snyk Code: static analysis (SAST) of src/
+  # ==========================================
+  snyk_code:
+    docker:
+      - image: cimg/openjdk:21.0
+    steps:
+      - checkout
+      - snyk/scan:
+          command: code test
+          severity-threshold: high
+          cli-version: 1.1308.1
+          monitor-on-build: false
+
 
   # ==========================================
   # PUBLISH JOB - Build and push Docker image
@@ -120,6 +155,12 @@ workflows:
   build_test_publish:
     jobs:
       - build
+      - snyk_scan:
+          requires:
+            - build
+      - snyk_code:
+          requires:
+            - build
       - test:
           requires:
             - build
