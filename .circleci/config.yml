@@ -73,6 +73,22 @@ jobs:
             echo "Pushing image to Docker Hub..."
             docker push $DOCKER_USERNAME/devops-demo:latest
 
+  # ==========================================
+  # DEPLOY JOB - Tell Render to redeploy
+  # ==========================================
+  deploy:
+    docker:
+      - image: cimg/base:stable
+    steps:
+      - run:
+          name: Redeploy latest image on Render
+          command: |
+            echo "Asking Render to redeploy the latest image..."
+            curl --fail --silent --show-error -X POST "$RENDER_DEPLOY_HOOK_URL"
+            echo ""
+            echo "Render is now pulling the latest devops-demo image from Docker Hub."
+
+
 # ==========================================
 # WORKFLOW - Run jobs in sequence
 # ==========================================
@@ -87,3 +103,6 @@ workflows:
           context: docker-hub
           requires:
             - test
+      - deploy:
+          requires:
+            - publish
